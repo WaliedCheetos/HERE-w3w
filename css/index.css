@@ -1,0 +1,371 @@
+/* Variables */
+
+:root {
+   --background: white;
+   --secondary-background: #FAFCFD;
+   --primary-text: #3F444D;
+   --secondary-text: #6d7178;
+   --gradient: linear-gradient(to right, #4A86FF,#48DAD0); /*linear-gradient(to right,#A566FF,#48DAD0);*/
+   --primary: #77A0E7;
+   --accent: #4A86FF;
+   --margin: 15px;
+   --padding: 15px;
+   --input-padding: 10px;
+   --font-family: FiraGO, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
+/* Fonts */
+
+@font-face {
+   font-family: FiraGO;
+   src: url(../../resources/FiraGO-Regular.woff);
+}
+
+@font-face {
+    font-family: FiraGO;
+    src: url(../../resources/FiraGO-Bold.woff);
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: FiraGO;
+    src: url(../../resources/FiraGO-Medium.woff);
+    font-weight: 500;
+}
+
+/* Main */
+
+body, html { 
+   border: 0; 
+   padding: 0; 
+   margin: 0;
+   font-size: 13px;
+   color: var(--secondary-text);
+   font-family: var(--font-family);
+   -webkit-font-smoothing: antialiased;
+   -moz-osx-font-smoothing: grayscale;
+}
+
+#map { 
+   width: 100vw; 
+   height: 100vh; 
+   position: absolute;
+   z-index: 1;
+}
+.map { 
+   width: 100vw; 
+   height: 100vh; 
+   position: absolute;
+   z-index: 1;
+}
+
+/* Links */
+
+a {
+   font-weight: 500;
+   color: var(--primary);
+   text-decoration: none;
+}
+
+a:hover {
+   color: var(--accent);
+   transition: .3s all ease-in-out;
+}
+
+/* Headers */
+
+h1 {
+   font-size: 18px;
+   font-weight: 500;
+   margin: 0px 0px 10px 0px;
+   color: var(--primary-text);
+}
+
+h2 {
+   font-size: 14px;
+   font-weight: 500;
+   margin: 0px 0px 10px 0;
+}
+
+._img_header {
+width:99px;
+}
+
+/* Paragraph */
+
+p {
+   line-height: 18px;
+}
+
+/* Text Input Component */
+.text-input {
+    padding: var(--input-padding);
+    font-weight: 500;
+    width: 100%;
+    background: var(--secondary-background);
+    font-size: 19px;
+    color: var(--primary-text);
+    font-family: var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    outline: none;
+    border: 2px solid transparent;
+    transition: .2s all ease-in-out;
+
+
+}
+
+
+
+/*.text-input:focus {
+   border: 2px solid var(--accent);
+}*/
+
+
+/*jQuery modal form*/
+
+label, input {
+    display: block;
+}
+
+    input.text {
+        margin-bottom: 12px;
+        width: 95%;
+        padding: .4em;
+        font-family: FiraGO;
+/*        src: url(../../resources/FiraGO-Medium.woff);*/*/
+        font-weight: 500;
+    }
+
+fieldset {
+    padding: 0;
+    border: 0;
+    margin-top: 25px;
+}
+
+h1 {
+    font-size: 1.2em;
+    margin: .6em 0;
+}
+
+
+#dialog-form {
+    z-index: 3;
+}
+
+.ui-dialog .ui-state-error {
+    padding: .3em;
+}
+
+.validateTips {
+    border: 1px solid transparent;
+    padding: 0.3em;
+}
+
+.hiddenContent {
+    display: none;
+}
+
+/*jQuery modal form*/
+
+/*leaflet layers control*/
+
+/*.leaflet-control-layers-toggle {
+    background-image: url(https://i.stack.imgur.com/3keSg.png) !important;
+    background-color: #2da0e2;
+    background-size: 20px 20px;
+    width: auto;
+}
+
+.leaflet-touch .leaflet-control-layers-toggle {
+    background-image: url(https://i.stack.imgur.com/3keSg.png) !important;
+    background-color: #2da0e2;
+}
+
+.leaflet-control-layers-expanded {
+    color: white;
+    background-color: #2da0e2;
+}*/
+
+/*leaflet layers control*/
+
+/*Mapillary*/
+#mly {
+height: 400px;
+}
+/*Mapillary*/
+
+
+/* Radio Buttons */
+/*.radio-container {
+   display: block;
+   position: relative;
+   padding-left: 25px;
+   margin: 15px 0;
+   cursor: pointer;
+   user-select: none;
+}
+
+.radio-container input {
+   position: absolute;
+   opacity: 0;
+   cursor: pointer;
+}*/
+/*.checkmark {
+   position: absolute;
+   top: 0;
+   left: 0;
+   height: 16px;
+   width: 16px;
+   background-color: var(--secondary-background);
+   border: 1px solid #ccc;
+   border-radius: 50%;
+   transition: .1s all ease-in-out;
+}
+ 
+.radio-container:hover input ~ .checkmark {
+   background-color: #EAEAEA;
+   border: 1px solid transparent;
+}
+ 
+
+.radio-container input:checked ~ .checkmark {
+   background-color: #2196F3;
+   border: 1px solid transparent;
+}
+ 
+
+.checkmark:after {
+   content: "";
+   position: absolute;
+   display: none;
+}
+ 
+.radio-container input:checked ~ .checkmark:after {
+   display: block;
+}
+ 
+.radio-container .checkmark:after {
+   top: 5px;
+   left: 5px;
+   width: 6px;
+   height: 6px;
+   border-radius: 50%;
+   background: white;
+}*/
+/* Slider Component */
+/*.slider {
+   -webkit-appearance: none;
+   appearance: none;
+   width: 100%;
+   height: 2px;
+   background: var(--secondary-text); 
+   outline: none;
+   margin: 10px 0;
+}
+ 
+.slider::-webkit-slider-thumb {
+   -webkit-appearance: none;
+   appearance: none;
+   width: 8px;
+   height: 16px; 
+   border-radius: 2px;
+   background: var(--accent);
+   cursor: pointer;
+}*/
+.columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+/*#loadingDiv {
+    display: none;
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: url(../../images/Aramex-Workshop/loading.gif) center no-repeat #0c0c0c52;
+}*/
+
+/*.ajax-loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -32px;*/ /* -1 * image width / 2 */
+    /*margin-top: -32px;*/ /* -1 * image height / 2 */
+    /*display: block;
+}*/
+
+/* Split the screen in half */
+.split {
+    height: 100%;
+    width: 50%;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    overflow-x: hidden;
+    padding-top: 20px;
+}
+
+/* Control the left side */
+.left {
+    left: 0;
+    background-color: #111;
+}
+
+/* Control the right side */
+.right {
+    right: 0;
+    background-color: red;
+}
+
+/* If you want the content centered horizontally and vertically */
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+    /* Style the image inside the centered container, if needed */
+/*    .centered img {
+        width: 150px;
+        border-radius: 50%;
+    }*/
+
+.letsCAD {
+width: 35%;
+height: 35%;
+}
+
+.loading {
+    width: 20%;
+    height: 20%;
+    /*display: none;*/
+}
+
+/*.loader {
+    border: 16px solid #f3f3f3;*/ /* Light grey */
+    /*border-top: 16px solid #3498db;*/ /* Blue */
+    /*border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}*/
+
+.no-display {
+display:none
+}

@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv='Content-Language' content='en' />
+    <title>WCheetos - HERE ///w3w LynkCo </title>
+
+    <!-- Social -->
+    <link rel="icon" type="image/png" sizes="16x16" href="../resources/favicon.ico" />
+
+    <!--jQuery-->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <!-- custom styles -->
+    <link rel="stylesheet" type="text/css" href="../css/index.css" />
+    <link rel="stylesheet" type="text/css" href="../css/sidebar.css" />
+    <link rel="stylesheet" type="text/css" href="../css/search.css" />
+
+    <!--MapKey leaflet plugin-->
+    <link rel="stylesheet" href="https://cdn.rawgit.com/mapshakers/leaflet-mapkey-icon/master/dist/MapkeyIcons.css" />
+
+    <!--Leaflet-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
+
+    <!-- HERE -->
+    <link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
+
+
+
+    <!--jQuery-->
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!--Leaflet-->
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+
+    <!--MapKey leaflet plugin-->
+    <script src="https://cdn.rawgit.com/mapshakers/leaflet-mapkey-icon/master/dist/L.Icon.Mapkey.js"></script>
+
+    <!-- HERE -->
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+    <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+
+    <script type="text/javascript">
+
+        $(function () {
+
+
+        });
+
+    </script>
+
+</head>
+<body>
+
+    <div class="split left">
+        <div id="map_left" class="map centered"></div>
+    </div>
+
+
+    <div class="split right">
+        <div id="map_right" class="map centered"></div>
+    </div>
+
+    <div id="sidebar" style="z-index:2;">
+        <div class="gradient-line"></div>
+        <div class="header">
+            <img src="../images/lynkCo-logo.png" style="height:31%; width:31%; padding-bottom: 7px;" />
+            <img src="../images/HERE-logo.png" style="height: 17%;width: 17%; padding-left: 15px;"/>
+            <img src="../images/w3w-logo.png" style="height:41%; width:41%; padding-left: 15px; " />
+            
+            <br />
+
+            <div class="gradient-line"></div>
+            <br />
+
+            <h1>HERE  ///w3w</h1>
+
+            <p>
+                <a target="_blank" href="https://what3words.com">What3Words</a> reversed, and located with <a target="_blank" href="https://developer.here.com/products/geocoding-and-search">HERE Location IoT geocoding service </a>
+
+            </p>
+
+            <div class="gradient-line"></div>
+            <br />
+
+            <div class="content">
+                <div class="content-group" id="content-group-1">
+
+                    <div class="group">
+                        <div class="h2-row">
+                            <div class="search-container">
+                                <h2 class="city-label">Select a ///w3w, address, city, place, POI, ... etc.</h2>
+                                <div class="outer-city-field-container">
+                                    <img src="../../resources/outline-search-24px.svg">
+                                    <div class="inner-city-field-container">
+                                        <input class="city-field text-input" style="z-index:3;" id="HERE-w3w_search" type="text" placeholder="Search Something ...">
+                                        <div class="city-field-suggestion"></div>
+                                    </div>
+                                </div>
+                                <br />
+                                <br />
+                                <h1 class="city-label" id="HERE-w3w_words">...</h1>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="gradient-line"></div>
+
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <script type="module" src="../js/app.js"></script>
+
+</body>
+</html>
