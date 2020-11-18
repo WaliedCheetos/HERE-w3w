@@ -160,7 +160,7 @@ function fullAC(query, callback) {
 function fullAC_lynkCo(query, callback) {
 
     //document.querySelector('#what3words_words').innerHTML = '...';
-    document.querySelector('#lynkoCo_words').innerHTML = '...';
+    document.querySelector('#HERE-w3w_words').innerHTML = '...';
 
     let p1 = $.getJSON("https://places.ls.hereapi.com/places/v1/autosuggest?at=" + mapLeaflet.getCenter().lat + ',' + mapLeaflet.getCenter().lng + "&q=" + query.term + "&apikey=" + HEREInitials.Credentials.APIKey);
     let p2 = $.getJSON("https://autocomplete.geocoder.ls.hereapi.com/6.2/suggest.json?prox=" + mapLeaflet.getCenter().lat + ',' + mapLeaflet.getCenter().lng + "&query=" + query.term + "&apikey=" + HEREInitials.Credentials.APIKey);
@@ -310,7 +310,7 @@ function what3words_AutoSuggest(query, callback) {
 
 function what3words_AutoSuggest_lynCo(query, callback) {
 
-    document.querySelector('#lynkoCo_words').innerHTML = '...';
+    document.querySelector('#HERE-w3w_words').innerHTML = '...';
 
     let url = $.getJSON("https://api.what3words.com/v3/autosuggest?focus=" + mapLeaflet.getCenter().lat + ',' + mapLeaflet.getCenter().lng + "&input=" + query.term + "&key=" + What3WordsInitials.Credentials.APIKey);
 
@@ -423,7 +423,7 @@ function what3words_Reverse(lat, lng) {
 
         $.when(url).done(function (result) {
             //document.querySelector('#what3words_words').innerHTML = result.words;
-            document.querySelector('#lynkoCo_words').innerHTML = result.words;
+            document.querySelector('#HERE-w3w_words').innerHTML = result.words;
 
 
             if (!marker_Leaflet) {
@@ -457,7 +457,7 @@ function what3words_ReverseCB(result) {
 
 
 $('#HERE-w3w_search').autocomplete({
-    source: HEREw3w_Search,
+    source: HEREw3w_AutoSuggest,
     minLength: 2,
     select: function (event, ui) {
         if (ui.item.userTag === '///w3w') {
@@ -574,7 +574,7 @@ $('#HERE-w3w_search').autocomplete({
                 let url_HEREReverseGeocoding = $.getJSON("https://revgeocode.search.hereapi.com/v1/revgeocode?at=" + result.coordinates.lat + "," + result.coordinates.lng + "&apikey=" + HEREInitials.Credentials.APIKey);
 
                 $.when(url_HEREReverseGeocoding).done(function (address) {
-                    document.querySelector('#lynkoCo_words').innerHTML = address.items[0].address.label;
+                    document.querySelector('#HERE-w3w_words').innerHTML = address.items[0].address.label;
 
                     ////mapLeaflet.flyTo([address.items[0].position.lat, address.items[0].position.lng], HEREInitials.Zoom);
 
@@ -671,14 +671,10 @@ $('#HERE-w3w_search').autocomplete({
     }
 });
 
-function HEREw3w_Search(query, callback) {
-
-    HEREw3w_AutoSuggest(query, callback);
-}
-
 function HEREw3w_AutoSuggest(query, callback) {
     try {
         document.querySelector('#HERE-w3w_words').innerHTML = '...';
+
         var reqData = {
             "query": {
                 "term": query.term,
@@ -688,52 +684,62 @@ function HEREw3w_AutoSuggest(query, callback) {
             "operation": "AutoSuggest"
         };
 
-        $.get(AWSInitials.APIGateways.HEREw3w, reqData, function (data) {
-            writeLog(logLevels.info, ("Response data: " + data), '');
+        $.ajax({
+            url: AWSInitials.APIGateways.HEREw3w,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(reqData),
+            success: function (data) {
+                writeLog(logLevels.info, ("Response data: " + data), '');
 
-            if (data.statusCode === '200') {
+                if (data.statusCode === 200) {
 
-                if (data.respOperation === 'w3wAutoSuggest') {
-                    //result is from what3words words autosuggest
-                    var words = JSON.parse(data.body).suggestions.filter(place => place.nearestPlace);
-                    words = words.map(place => {
-                        return {
-                            title: place.words,
-                            value: '///' + place.words + ',' + place.nearestPlace + '(Distance to Focus: ' + place.distanceToFocusKm + ' KM)',
-                            distance: place.distanceToFocusKm,
-                            userTag: '///w3w'
-                        };
-                    });
+                    if (data.respOperation === 'w3wAutoSuggest') {
+                        //result is from what3words words autosuggest
+                        var words = JSON.parse(data.body).suggestions.filter(place => place.nearestPlace);
+                        words = words.map(place => {
+                            return {
+                                title: place.words,
+                                value: '///' + place.words + ',' + place.nearestPlace + '(Distance to Focus: ' + place.distanceToFocusKm + ' KM)',
+                                distance: place.distanceToFocusKm,
+                                userTag: '///w3w'
+                            };
+                        });
 
-                    // limit display to 10 results
-                    return callback(words.slice(0, 10));
+                        // limit display to 10 results
+                        return callback(words.slice(0, 10));
+                    }
+
+                    else if (data.respOperation === 'HEREAutoSuggest') {
+                        //result is from HERE words autosuggest
+                        var places = JSON.parse(data.body).results.filter(place => place.vicinity);
+                        places = places.map(place => {
+                            return {
+                                title: place.title,
+                                value: place.title + ',' + place.vicinity.replace(/<br\/>/g, ", ") + '(' + place.category + ')',
+                                distance: place.distance,
+                                id: place.id,
+                                position: place.position,
+                                userTag: 'HERE'
+                            };
+                        });
+
+                        // limit display to 10 results
+                        return callback(places.slice(0, 10));
+                    }
+                    else if (data.respOperation === 'w3wReverseGeocode') {
+                    }
+                    else if (data.respOperation === 'HEREReverseGeocode') {
+                    }
                 }
 
-                else if (data.respOperation === 'HEREAutoSuggest') {
-                    //result is from HERE words autosuggest
-                    var places = JSON.parse(data.body).results.filter(place => place.vicinity);
-                    places = places.map(place => {
-                        return {
-                            title: place.title,
-                            value: place.title + ',' + place.vicinity.replace(/<br\/>/g, ", ") + '(' + place.category + ')',
-                            distance: place.distance,
-                            id: place.id,
-                            position: place.position,
-                            userTag: 'HERE'
-                        };
-                    });
-
-                    // limit display to 10 results
-                    return callback(places.slice(0, 10));
+                else {
+                    writeLog(logLevels.alert, data.statusCode, '');
                 }
-                else if (data.respOperation === 'w3wReverseGeocode') {
-                }
-                else if (data.respOperation === 'HEREReverseGeocode') {
-                }
-            }
-
-            else {
-                writeLog(logLevels.alert, data.statusCode, '');
+            },
+            error: function (data) {
+                writeLog(logLevels.error, data, '');
             }
         });
 
