@@ -461,14 +461,14 @@ $('#HERE-w3w_search').autocomplete({
     minLength: 2,
     select: function (event, ui) {
         if (ui.item.userTag === '///w3w') {
-            reqData = {
+            var reqData = {
                 "query": {
                     "term": query.term,
                     "lat": mapLeaflet.getCenter().lat,
                     "lng": mapLeaflet.getCenter().lng
                 },
                 "operation": "w3wReverseGeocode"
-            }
+            };
 
             $.get(AWSInitials.APIGateways.HEREw3w, reqData, function (data) {
                 writeLog(logLevels.info, ("Response data: " + data), '');
@@ -679,14 +679,14 @@ function HEREw3w_Search(query, callback) {
 function HEREw3w_AutoSuggest(query, callback) {
     try {
         document.querySelector('#HERE-w3w_words').innerHTML = '...';
-        reqData = {
+        var reqData = {
             "query": {
                 "term": query.term,
                 "lat": mapLeaflet.getCenter().lat,
                 "lng": mapLeaflet.getCenter().lng
             },
             "operation": "AutoSuggest"
-        }
+        };
 
         $.get(AWSInitials.APIGateways.HEREw3w, reqData, function (data) {
             writeLog(logLevels.info, ("Response data: " + data), '');
