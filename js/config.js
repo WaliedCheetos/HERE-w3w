@@ -48,7 +48,7 @@ const What3WordsInitials = {
 
 const AWSInitials = {
     APIGateways: {
-        HEREw3w: 'https://ul1u2ghdfl.execute-api.us-east-1.amazonaws.com/prod/here-w3w'
+        //HEREw3w: 'https://ul1u2ghdfl.execute-api.us-east-1.amazonaws.com/prod/here-w3w'
     }
 }
 
