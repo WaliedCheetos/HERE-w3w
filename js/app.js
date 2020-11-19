@@ -10,7 +10,7 @@ document.querySelector('.content').style.height = height + 'px';
 const mapLeaflet = L.map('map_left', {
 
     center: [HEREInitials.Center.lat, HEREInitials.Center.lng],
-    zoom: 11,
+    zoom: HEREInitials.Zoom0,
     layers: [L.tileLayer(HEREInitials.MapTileURLSuffix + `/${HEREInitials.MapTileStyle_Default}/{z}/{x}/{y}/512/png8?apiKey=${HEREInitials.Credentials.APIKey}&ppi=320`)]
 });
 
@@ -36,7 +36,7 @@ const defaultLayers = platform.createDefaultLayers();
 
 const mapHERE = new H.Map(document.getElementById('map_right'), defaultLayers.vector.normal.map, {
     center: HEREInitials.Center,
-    zoom: HEREInitials.Zoom,
+    zoom: HEREInitials.Zoom0,
     tilt: HEREInitials.Tilt,
     pixelRatio: window.devicePixelRatio || 1
 });
@@ -68,9 +68,111 @@ $('#HERE-w3w_search').autocomplete({
         if (ui.item.userTag === '///w3w') {
             var reqData = {
                 "query": {
-                    "term": query.term,
-                    "lat": mapLeaflet.getCenter().lat,
-                    "lng": mapLeaflet.getCenter().lng
+                    "term": ui.item.title,
+                    //"lat": mapLeaflet.getCenter().lat,
+                    //"lng": mapLeaflet.getCenter().lng
+                },
+                "operation": "w3wToCoordinates"
+            };
+
+            $.ajax({
+                url: AWSInitials.APIGateways.HEREw3w,
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(reqData),
+                success: function (data) {
+                    writeLog(logLevels.info, ("Response data: " + data), '');
+
+                    if (data.statusCode === 200) {
+
+                        if (data.respOperation === 'w3wToCoordinates') {
+
+                            reqData = {
+                                "query": {
+                                    "lat": JSON.parse(data.body).coordinates.lat,
+                                    "lng": JSON.parse(data.body).coordinates.lng
+                                },
+                                "operation": "HEREReverseGeocode"
+                            };
+                            $.ajax({
+                                url: AWSInitials.APIGateways.HEREw3w,
+                                type: 'POST',
+                                dataType: 'json',
+                                contentType: 'application/json',
+                                data: JSON.stringify(reqData),
+                                success: function (data) {
+                                    writeLog(logLevels.info, ("Response data: " + data), '');
+
+                                    if (data.statusCode === 200) {
+
+                                        if (JSON.parse(data.body).items.length > 0) {
+                                            document.querySelector('#HERE-w3w_words').innerHTML = JSON.parse(data.body).items[0].address.label;
+
+                                            if (!marker_Leaflet) {
+                                                marker_Leaflet = L.marker([JSON.parse(data.body).items[0].position.lat, JSON.parse(data.body).items[0].position.lng], { icon: mki, title: JSON.parse(data.body).items[0].address.label });
+                                                marker_Leaflet.bindPopup(JSON.parse(data.body).items[0].address.label).openPopup();
+                                                marker_Leaflet.addTo(mapLeaflet);
+                                            } else {
+                                                marker_Leaflet.setLatLng([JSON.parse(data.body).items[0].position.lat, JSON.parse(data.body).items[0].position.lng], { icon: mki, title: JSON.parse(data.body).items[0].address.label });
+                                                marker_Leaflet.bindPopup(JSON.parse(data.body).items[0].address.label).openPopup();
+                                                marker_Leaflet.addTo(mapLeaflet);
+                                            }
+
+                                            if (!marker_HERE) {
+                                                marker_HERE = new H.map.Marker(JSON.parse(data.body).items[0].position);
+                                                mapHERE.addObject(marker_HERE);
+                                            } else {
+                                                marker_HERE.setGeometry(JSON.parse(data.body).items[0].position);
+                                            }
+
+                                            mapLeaflet.flyTo([JSON.parse(data.body).items[0].position.lat, JSON.parse(data.body).items[0].position.lng], HEREInitials.Zoom);
+
+                                            mapHERE.getViewModel().setLookAtData({
+                                                position: JSON.parse(data.body).items[0].position,
+                                                zoom: HEREInitials.Zoom,
+                                                heading: HEREInitials.Heading,
+                                                tilt: HEREInitials.Tilt
+                                            }, true);
+                                        }
+                                        else {
+                                            mapLeaflet.flyTo([JSON.parse(data.body).items[0].position.lat, JSON.parse(data.body).items[0].position.lng], HEREInitials.Zoom);
+
+                                            if (!marker_HERE) {
+                                                marker_HERE = new H.map.Marker(JSON.parse(data.body).items[0].position);
+                                                mapHERE.addObject(marker_HERE);
+                                            } else {
+                                                marker_HERE.setGeometry(JSON.parse(data.body).items[0].position);
+                                            }
+                                        }
+                                    }
+                                    else {
+                                        writeLog(logLevels.alert, data.statusCode, '');
+                                    }
+                                },
+                                error: function (data) {
+                                    writeLog(logLevels.error, data, '');
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        writeLog(logLevels.alert, data.statusCode, '');
+                    }
+                },
+                error: function (data) {
+                    writeLog(logLevels.error, data, '');
+                }
+            });
+
+         
+        }
+        else if (ui.item.userTag === 'HERE') {
+            var reqData = {
+                "query": {
+                    //"term": query.term,
+                    "lat": ui.item.position[0],
+                    "lng": ui.item.position[1]
                 },
                 "operation": "w3wReverseGeocode"
             };
@@ -88,44 +190,33 @@ $('#HERE-w3w_search').autocomplete({
 
                         if (data.respOperation === 'w3wReverseGeocode') {
 
-                            document.querySelector('#HERE-w3w_words').innerHTML = JSON.parse(data.body).items[0].address.label;
-
-                            ////mapLeaflet.flyTo([address.items[0].position.lat, address.items[0].position.lng], HEREInitials.Zoom);
-
-                            mapHERE.getViewModel().setLookAtData({
-                                position: address.items[0].position,
-                                zoom: HEREInitials.Zoom,
-                                heading: HEREInitials.Heading,
-                                tilt: HEREInitials.Tilt
-                            }, true);
+                            document.querySelector('#HERE-w3w_words').innerHTML = '///' + JSON.parse(data.body).words;
 
                             if (!marker_Leaflet) {
-                                marker_Leaflet = L.marker([address.items[0].position.lat, address.items[0].position.lng], { icon: mki, title: ('///' + ui.item.title) });
-                                marker_Leaflet.bindPopup(('///' + ui.item.title)).openPopup();
+                                marker_Leaflet = L.marker([ui.item.position[0], ui.item.position[1]], { icon: mki, title: ('///' + JSON.parse(data.body).words) });
+                                marker_Leaflet.bindPopup(('///' + JSON.parse(data.body).words)).openPopup();
                                 marker_Leaflet.addTo(mapLeaflet);
                             } else {
-                                marker_Leaflet.setLatLng([address.items[0].position.lat, address.items[0].position.lng], { icon: mki, title: ('///' + ui.item.title) });
-                                marker_Leaflet.bindPopup(('///' + ui.item.title)).openPopup();
+                                marker_Leaflet.setLatLng([ui.item.position[0], ui.item.position[1]], { icon: mki, title: ('///' + JSON.parse(data.body).words) });
+                                marker_Leaflet.bindPopup(('///' + JSON.parse(data.body).words)).openPopup();
                                 marker_Leaflet.addTo(mapLeaflet);
                             }
-                            mapLeaflet.flyTo([address.items[0].position.lat, address.items[0].position.lng], HEREInitials.Zoom);
 
                             if (!marker_HERE) {
-                                marker_HERE = new H.map.Marker(address.items[0].position);
+                                marker_HERE = new H.map.Marker({ lat: ui.item.position[0], lng: ui.item.position[1] });
                                 mapHERE.addObject(marker_HERE);
                             } else {
-                                marker_HERE.setGeometry(address.items[0].position);
+                                marker_HERE.setGeometry({ lat: ui.item.position[0], lng: ui.item.position[1] });
                             }
 
+                            mapLeaflet.flyTo(ui.item.position, HEREInitials.Zoom);
+
                             mapHERE.getViewModel().setLookAtData({
-                                position: address.items[0].position,
+                                position: { lat: ui.item.position[0], lng: ui.item.position[1] },
                                 zoom: HEREInitials.Zoom,
                                 heading: HEREInitials.Heading,
                                 tilt: HEREInitials.Tilt
                             }, true);
-                        }
-                        else if (data.respOperation === 'HEREReverseGeocode') {
-
                         }
                     }
 
@@ -137,206 +228,6 @@ $('#HERE-w3w_search').autocomplete({
                     writeLog(logLevels.error, data, '');
                 }
             });
-
-
-
-            $.get(AWSInitials.APIGateways.HEREw3w, reqData, function (data) {
-                writeLog(logLevels.info, ("Response data: " + data), '');
-
-                if (data.statusCode === '200') {
-
-                    if (data.respOperation === 'w3wAutoSuggest') {
-                        //result is from what3words words autosuggest
-                        var words = JSON.parse(data.body).suggestions.filter(place => place.nearestPlace);
-                        words = words.map(place => {
-                            return {
-                                title: place.words,
-                                value: '///' + place.words + ',' + place.nearestPlace + '(Distance to Focus: ' + place.distanceToFocusKm + ' KM)',
-                                distance: place.distanceToFocusKm,
-                                userTag: '///w3w'
-                            };
-                        });
-
-                        // limit display to 10 results
-                        return callback(words.slice(0, 10));
-                    }
-
-                    else if (data.respOperation === 'HEREAutoSuggest') {
-                        //result is from HERE words autosuggest
-                        var places = JSON.parse(data.body).results.filter(place => place.vicinity);
-                        places = places.map(place => {
-                            return {
-                                title: place.title,
-                                value: place.title + ',' + place.vicinity.replace(/<br\/>/g, ", ") + '(' + place.category + ')',
-                                distance: place.distance,
-                                id: place.id,
-                                position: place.position,
-                                userTag: 'HERE'
-                            };
-                        });
-
-                        // limit display to 10 results
-                        return callback(places.slice(0, 10));
-                    }
-                    else if (data.respOperation === 'w3wReverseGeocode') {
-                        document.querySelector('#HERE-w3w_words').innerHTML = JSON.parse(data.body).items[0].address.label;
-
-                        ////mapLeaflet.flyTo([address.items[0].position.lat, address.items[0].position.lng], HEREInitials.Zoom);
-
-                        mapHERE.getViewModel().setLookAtData({
-                            position: address.items[0].position,
-                            zoom: HEREInitials.Zoom,
-                            heading: HEREInitials.Heading,
-                            tilt: HEREInitials.Tilt
-                        }, true);
-
-                        //if (!marker_Leaflet) {
-                        //    marker_Leaflet = L.marker([address.items[0].position.lat, address.items[0].position.lng], { icon: mki, title: address.items[0].address.label });
-                        //    marker_Leaflet.bindPopup(address.items[0].address.label).openPopup();
-                        //    marker_Leaflet.addTo(mapLeaflet);
-                        //} else {
-                        //    marker_Leaflet.setLatLng([address.items[0].position.lat, address.items[0].position.lng], { icon: mki, title: address.items[0].address.label });
-                        //    marker_Leaflet.bindPopup(address.items[0].address.label).openPopup();
-                        //    marker_Leaflet.addTo(mapLeaflet);
-                        //}
-                        //mapLeaflet.flyTo([address.items[0].position.lat, address.items[0].position.lng], HEREInitials.Zoom);
-
-                        if (!marker_Leaflet) {
-                            marker_Leaflet = L.marker([address.items[0].position.lat, address.items[0].position.lng], { icon: mki, title: ('///' + ui.item.title) });
-                            marker_Leaflet.bindPopup(('///' + ui.item.title)).openPopup();
-                            marker_Leaflet.addTo(mapLeaflet);
-                        } else {
-                            marker_Leaflet.setLatLng([address.items[0].position.lat, address.items[0].position.lng], { icon: mki, title: ('///' + ui.item.title) });
-                            marker_Leaflet.bindPopup(('///' + ui.item.title)).openPopup();
-                            marker_Leaflet.addTo(mapLeaflet);
-                        }
-                        mapLeaflet.flyTo([address.items[0].position.lat, address.items[0].position.lng], HEREInitials.Zoom);
-
-                        if (!marker_HERE) {
-                            marker_HERE = new H.map.Marker(address.items[0].position);
-                            mapHERE.addObject(marker_HERE);
-                        } else {
-                            marker_HERE.setGeometry(address.items[0].position);
-                        }
-
-                        mapHERE.getViewModel().setLookAtData({
-                            position: address.items[0].position,
-                            zoom: HEREInitials.Zoom,
-                            heading: HEREInitials.Heading,
-                            tilt: HEREInitials.Tilt
-                        }, true);
-                    }
-                    else if (data.respOperation === 'HEREReverseGeocode') {
-                    }
-                }
-
-                else {
-                    writeLog(logLevels.alert, data.statusCode, '');
-                }
-            });
-
-            //alert('///w3w');
-
-            let url_What3Words_Convert2Coordinates = $.getJSON("https://api.what3words.com/v3/convert-to-coordinates?words=" + ui.item.title + "&format=json" + "&key=" + What3WordsInitials.Credentials.APIKey);
-
-            $.when(url_What3Words_Convert2Coordinates).done(function (result) {
-
-                let url_HEREReverseGeocoding = $.getJSON("https://revgeocode.search.hereapi.com/v1/revgeocode?at=" + result.coordinates.lat + "," + result.coordinates.lng + "&apikey=" + HEREInitials.Credentials.APIKey);
-
-                $.when(url_HEREReverseGeocoding).done(function (address) {
-                    document.querySelector('#HERE-w3w_words').innerHTML = address.items[0].address.label;
-
-                    ////mapLeaflet.flyTo([address.items[0].position.lat, address.items[0].position.lng], HEREInitials.Zoom);
-
-                    mapHERE.getViewModel().setLookAtData({
-                        position: address.items[0].position,
-                        zoom: HEREInitials.Zoom,
-                        heading: HEREInitials.Heading,
-                        tilt: HEREInitials.Tilt
-                    }, true);
-
-                    //if (!marker_Leaflet) {
-                    //    marker_Leaflet = L.marker([address.items[0].position.lat, address.items[0].position.lng], { icon: mki, title: address.items[0].address.label });
-                    //    marker_Leaflet.bindPopup(address.items[0].address.label).openPopup();
-                    //    marker_Leaflet.addTo(mapLeaflet);
-                    //} else {
-                    //    marker_Leaflet.setLatLng([address.items[0].position.lat, address.items[0].position.lng], { icon: mki, title: address.items[0].address.label });
-                    //    marker_Leaflet.bindPopup(address.items[0].address.label).openPopup();
-                    //    marker_Leaflet.addTo(mapLeaflet);
-                    //}
-                    //mapLeaflet.flyTo([address.items[0].position.lat, address.items[0].position.lng], HEREInitials.Zoom);
-
-                    if (!marker_Leaflet) {
-                        marker_Leaflet = L.marker([address.items[0].position.lat, address.items[0].position.lng], { icon: mki, title: ('///' + ui.item.title) });
-                        marker_Leaflet.bindPopup(('///' + ui.item.title)).openPopup();
-                        marker_Leaflet.addTo(mapLeaflet);
-                    } else {
-                        marker_Leaflet.setLatLng([address.items[0].position.lat, address.items[0].position.lng], { icon: mki, title: ('///' + ui.item.title) });
-                        marker_Leaflet.bindPopup(('///' + ui.item.title)).openPopup();
-                        marker_Leaflet.addTo(mapLeaflet);
-                    }
-                    mapLeaflet.flyTo([address.items[0].position.lat, address.items[0].position.lng], HEREInitials.Zoom);
-
-                    if (!marker_HERE) {
-                        marker_HERE = new H.map.Marker(address.items[0].position);
-                        mapHERE.addObject(marker_HERE);
-                    } else {
-                        marker_HERE.setGeometry(address.items[0].position);
-                    }
-
-                    mapHERE.getViewModel().setLookAtData({
-                        position: address.items[0].position,
-                        zoom: HEREInitials.Zoom,
-                        heading: HEREInitials.Heading,
-                        tilt: HEREInitials.Tilt
-                    }, true);
-                });
-            });
-        }
-        else if (ui.item.userTag === 'HERE') {
-            //alert('HERE');
-
-            what3words_Reverse(ui.item.position[0], ui.item.position[1]);
-
-            //console.log("Selected: " + ui.item.value + " with LocationId " + ui.item.id);
-            mapLeaflet.flyTo(ui.item.position, HEREInitials.Zoom);
-
-
-            mapHERE.getViewModel().setLookAtData({
-                position: { lat: ui.item.position[0], lng: ui.item.position[1] },
-                zoom: HEREInitials.Zoom,
-                heading: HEREInitials.Heading,
-                tilt: HEREInitials.Tilt
-            }, true);
-
-
-
-            if (!marker_Leaflet) {
-                marker_Leaflet = L.marker([ui.item.position[0], ui.item.position[1]], { icon: mki, title: ui.item.value });
-                marker_Leaflet.bindPopup(ui.item.value).openPopup();
-                marker_Leaflet.addTo(mapLeaflet);
-            } else {
-                marker_Leaflet.setLatLng([ui.item.position[0], ui.item.position[1]], { icon: mki, title: ui.item.value });
-                marker_Leaflet.bindPopup(ui.item.value).openPopup();
-                marker_Leaflet.addTo(mapLeaflet);
-            }
-            mapLeaflet.flyTo(ui.item.position, HEREInitials.Zoom);
-
-
-            if (!marker_HERE) {
-                marker_HERE = new H.map.Marker({ lat: ui.item.position[0], lng: ui.item.position[1] });
-                mapHERE.addObject(marker_HERE);
-            } else {
-                marker_HERE.setGeometry({ lat: ui.item.position[0], lng: ui.item.position[1] });
-            }
-            mapHERE.getViewModel().setLookAtData({
-                position: { lat: ui.item.position[0], lng: ui.item.position[1] },
-                zoom: HEREInitials.Zoom,
-                heading: HEREInitials.Heading,
-                tilt: HEREInitials.Tilt
-            }, true);
-
-
         }
     }
 });

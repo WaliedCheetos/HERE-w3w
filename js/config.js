@@ -23,8 +23,8 @@ const HEREInitials = {
     //MapTileURLSuffix: `https://2.base.maps.ls.hereapi.com/maptile/2.1/maptile/newest/${HEREInitials.MapTileStyle.ReducedDay}/{z}/{x}/{y}/512/png8?apiKey=${HEREInitials.Credentials.APIKey}&ppi=320`,
     MapTileURLSuffix: 'https://2.base.maps.ls.hereapi.com/maptile/2.1/maptile/newest',
     HEREVectorTileURLSuffix: 'https://assets.vector.hereapi.com/styles/berlin/base/tangram/tilezen',
-
-    Zoom: 11,
+    Zoom0: 11,
+    Zoom: 17,
     Heading: 180,
     Tilt: 65,
     Credentials: {
